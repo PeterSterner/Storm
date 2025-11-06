@@ -4,25 +4,18 @@ let screenWidth = 1280;
 let screenHeight = 550;
 
 class Stadion {
-  constructor(x, y) {
+  constructor(id, x, y, meta = {}) {
+    this.id = id;
     this.x = x;
     this.y = y;
+    this.meta = meta;
+    this.radius = 8;
   }
 
   display() {
     fill(255, 0, 0);
     noStroke();
-    ellipse(this.x, this.y, 10, 10);
-  }
-}
-
-// Ny: Node arver fra Stadion og får et id
-class Node extends Stadion {
-  constructor(id, x, y, meta = {}) {
-    super(x, y);
-    this.id = id;
-    this.meta = meta; // valgfrit: til yderligere data
-    this.radius = 8;
+    ellipse(this.x, this.y, this.radius * 2, this.radius * 2);
   }
 
   // valgfrit: vis id ved hover eller altid
@@ -40,7 +33,7 @@ class Node extends Stadion {
 
   displayTooltip() {
     const lines = [];
-    lines.push(this.meta.navn || `Node: ${this.id}`);
+    lines.push(this.meta.navn || `Navn: ${this.id}`);
     if (this.meta.bynavn) lines.push(`By: ${this.meta.bynavn}`);
     if (this.meta.kapacitet)
       lines.push(`Kapacitet: ${this.meta.kapacitet.toLocaleString()}`);
@@ -90,8 +83,8 @@ class Graf {
     this.kanter = [];
   }
 
-  tilføjeNode(node) {
-    this.noder.push(node);
+  tilføjeStadion(stadion) {
+    this.noder.push(stadion);
   }
 
   tilføjeKant(a, b) {
@@ -175,28 +168,52 @@ function setup() {
   graf = new Graf();
 
   // Tilføj noder (brug dine koordinater)
-  graf.tilføjeNode(
-    new Node("A", 820, 330, {
+  graf.tilføjeStadion(
+    new Stadion("A", 820, 330, {
       navn: "Parken",
       bynavn: "København",
       kapacitet: 38000,
       byggetår: 1992,
     })
   );
-  graf.tilføjeNode(
-    new Node("B", 630, 380, {
+  graf.tilføjeStadion(
+    new Stadion("B", 620, 250, {
+      navn: "Ceres Park",
+      bynavn: "Aarhus",
+      kapacitet: 19000,
+      byggetår: 1920,
+    })
+  );
+  graf.tilføjeStadion(
+    new Stadion("C", 465, 360, {
+      navn: "Esbjerg Stadion",
+      bynavn: "Esbjerg",
+      kapacitet: 18000,
+      byggetår: 1955,
+    })
+  );
+  graf.tilføjeStadion(
+    new Stadion("D", 630, 380, {
       navn: "Odense Stadion",
       bynavn: "Odense",
       kapacitet: 16000,
       byggetår: 1941,
     })
   );
-  graf.tilføjeNode(
-    new Node("C", 590, 130, {
+  graf.tilføjeStadion(
+    new Stadion("E", 590, 130, {
       navn: "Aalborg Stadion",
       bynavn: "Aalborg",
       kapacitet: 14000,
       byggetår: 2002,
+    })
+  );
+  graf.tilføjeStadion(
+    new Stadion("F", 750, 420, {
+      navn: "Nordsjællands Stadion",
+      bynavn: "Farum",
+      kapacitet: 10000,
+      byggetår: 1999,
     })
   );
 
