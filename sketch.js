@@ -2,6 +2,39 @@ let img;
 let stadions;
 let screenWidth = 1280;
 let screenHeight = 550;
+let maxKantVægt = 12;
+
+function tegnTabelOverVægte() {
+  let cellWidth = 52.25;
+  let cellHeight = 20;
+  let data = [
+    ["Vægt", "A", "B", "C", "D", "E", "F", "G"],
+    ["A", "w", "København"],
+    ["B", "30", "Aarhus"],
+    ["C", "27", "Odense"],
+    ["D", "15", "Esbjerg"],
+    ["E", "40", "Aalborg"],
+    ["F", "22", "Herning"],
+    ["G", "18", "Næstved"],
+  ];
+  // Gå igennem hver række og kolonne
+  for (let i = 0; i < data.length; i++) {
+    for (let j = 0; j < data[i].length; j++) {
+      let x = j * cellWidth;
+      let y = i * cellHeight + 10;
+
+      // Tegn celle (rektangel)
+      stroke(0);
+      noFill();
+      rect(x, y, cellWidth, cellHeight);
+
+      // Tegn tekst i midten af cellen
+      fill(0);
+      strokeWeight(1);
+      text(data[i][j], x + cellWidth / 2, y + cellHeight / 2 + 6);
+    }
+  }
+}
 
 class Stadion {
   constructor(id, x, y, meta = {}) {
@@ -82,7 +115,8 @@ class Graf {
   }
 
   tilføjeKant(a, b) {
-    const w = dist(a.x, a.y, b.x, b.y);
+    const d = dist(a.x, a.y, b.x, b.y);
+    let w = Math.round(d / 20);
     this.kanter.push(new Kanter(a, b, w));
   }
 
@@ -107,7 +141,9 @@ class Graf {
     stroke(0, 0, 255, 150);
     strokeWeight(2);
     for (let e of this.kanter) {
-      line(e.a.x, e.a.y, e.b.x, e.b.y);
+      if (e.vægt < maxKantVægt) {
+        line(e.a.x, e.a.y, e.b.x, e.b.y);
+      }
     }
   }
 
@@ -141,16 +177,6 @@ function drawMap() {
 function drawStadions() {
   for (let stadion of stadions) {
     stadion.display();
-  }
-}
-
-function drawLinesBetweenStadions() {
-  stroke(0, 0, 255);
-  strokeWeight(2);
-  for (let i = 0; i < stadions.length; i++) {
-    for (let j = i + 1; j < stadions.length; j++) {
-      line(stadions[i].x, stadions[i].y, stadions[j].x, stadions[j].y);
-    }
   }
 }
 
@@ -200,11 +226,11 @@ function setup() {
     })
   );
   graf.tilføjeStadion(
-    new Stadion("F", 800, 300, {
-      navn: "Nordsjællands Stadion",
-      bynavn: "Farum",
-      kapacitet: 10000,
-      byggetår: 1999,
+    new Stadion("F", 510, 250, {
+      navn: "FC Midtjylland Stadion",
+      bynavn: "Herning",
+      kapacitet: 12000,
+      byggetår: 2004,
     })
   );
   graf.tilføjeStadion(
@@ -235,4 +261,5 @@ function draw() {
     hovered.highlight();
     hovered.displayTooltip();
   }
+  tegnTabelOverVægte();
 }
