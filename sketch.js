@@ -5,33 +5,68 @@ let screenHeight = 550;
 let maxKantVægt = 12;
 
 function tegnTabelOverVægte() {
+  if (!graf || !graf.noder) return;
+
+  const nodes = graf.noder;
+  const n = nodes.length;
   let cellWidth = 52.25;
   let cellHeight = 20;
-  let data = [
-    ["Vægt", "A", "B", "C", "D", "E", "F", "G"],
-    ["A", "w", "København"],
-    ["B", "30", "Aarhus"],
-    ["C", "27", "Odense"],
-    ["D", "15", "Esbjerg"],
-    ["E", "40", "Aalborg"],
-    ["F", "22", "Herning"],
-    ["G", "18", "Næstved"],
-  ];
-  // Gå igennem hver række og kolonne
-  for (let i = 0; i < data.length; i++) {
-    for (let j = 0; j < data[i].length; j++) {
-      let x = j * cellWidth;
-      let y = i * cellHeight + 10;
 
-      // Tegn celle (rektangel)
+  // helper: find vægt mellem to noder
+  function getWeight(a, b) {
+    for (let e of graf.kanter) {
+      if ((e.a === a && e.b === b) || (e.a === b && e.b === a)) {
+        return e.vægt < maxKantVægt ? e.vægt : "-";
+      }
+    }
+    return "-";
+  }
+
+  // tegn header række
+  for (let j = 0; j < n + 1; j++) {
+    let x = j * cellWidth;
+    let y = 10;
+    stroke(0);
+    noFill();
+    rect(x, y, cellWidth, cellHeight);
+
+    fill(0);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    if (j === 0) {
+      text("Vægt", x + cellWidth / 2, y + cellHeight / 2 + 6);
+    } else {
+      text(nodes[j - 1].id, x + cellWidth / 2, y + cellHeight / 2 + 6);
+    }
+  }
+
+  // tegn data rækker
+  for (let i = 0; i < n; i++) {
+    let rowY = (i + 1) * cellHeight + 10;
+
+    // første celle: node-id
+    stroke(0);
+    noFill();
+    rect(0, rowY, cellWidth, cellHeight);
+    fill(0);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    text(nodes[i].id, cellWidth / 2, rowY + cellHeight / 2 + 6);
+
+    // vægt-celler
+    for (let j = 0; j < n; j++) {
+      let x = (j + 1) * cellWidth;
       stroke(0);
       noFill();
-      rect(x, y, cellWidth, cellHeight);
+      rect(x, rowY, cellWidth, cellHeight);
 
-      // Tegn tekst i midten af cellen
       fill(0);
-      strokeWeight(1);
-      text(data[i][j], x + cellWidth / 2, y + cellHeight / 2 + 6);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      const weight = i === j ? "0" : getWeight(nodes[i], nodes[j]);
+      text(weight, x + cellWidth / 2, rowY + cellHeight / 2 + 6);
     }
   }
 }
