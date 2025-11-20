@@ -6,183 +6,9 @@ let maxKantVægt = 12;
 let button;
 let combo1, combo2;
 
+let graf;
 let distances;
 let predecessors;
-
-function initializeDijkstra(graf, startNode) {
-  distances = {};
-  predecessors = {};
-  for (let node of graf.noder) {
-    distances[node.id] = Infinity;
-    predecessors[node.id] = null;
-  }
-  distances[startNode.id] = 0;
-}
-
-function relax(u, v, weight) {}
-
-function extractMinNode(unvisited, distances) {}
-
-function Dijkstra(startNode, endNode) {
-  console.log("Dijkstra's algoritme kaldt");
-  // Implementér Dijkstra's algoritme her
-  // Returnér den korteste sti som en liste af noder
-  initializeDijkstra(graf, startNode);
-  console.log(distances, predecessors);
-
-  let unvisited = new Set(graf.noder);
-  while (unvisited.size > 0) {
-    let currentNode = null;
-    let currentDist = Infinity;
-    for (let node of unvisited) {
-      console.log("Tjekker node", node.id, "med dist", dist[node.id]);
-      if (dist[node.id] < currentDist) {
-        currentDist = dist[node.id];
-        currentNode = node;
-      }
-    }
-
-    if (currentNode === endNode) break;
-
-    unvisited.delete(currentNode);
-
-    for (let neighborInfo of graf.naboer(currentNode)) {
-      let alt = dist[currentNode.id] + neighborInfo.vægt;
-      if (alt < dist[neighborInfo.node.id]) {
-        dist[neighborInfo.node.id] = alt;
-        pred[neighborInfo.node.id] = currentNode;
-      }
-    }
-  }
-
-  let path = [];
-  let step = endNode;
-  while (step) {
-    path.unshift(step);
-    step = pred[step.id];
-  }
-
-  if (path[0] !== startNode) return []; // No path found
-  return path;
-}
-
-function buttonHandler() {
-  const startId = combo1.value();
-  const slutId = combo2.value();
-  if (startId === slutId) {
-    alert("Start- og slutstadion må ikke være det samme!");
-    return;
-  } else if (!startId || !slutId) {
-    alert("Vælg både start- og slutstadion!");
-    return;
-  } else {
-    const shortestPath = Dijkstra(
-      graf.noder.find((n) => n.id === startId),
-      graf.noder.find((n) => n.id === slutId)
-    );
-    console.log("Korteste vej:", shortestPath);
-  }
-}
-
-function createUI() {
-  // Første combo-box
-  combo1 = createSelect();
-  combo1.position(width / 2 + 50, 20);
-
-  combo1.option("A");
-  combo1.option("B");
-  combo1.option("C");
-  combo1.option("D");
-  combo1.option("E");
-  combo1.option("F");
-  combo1.option("G");
-
-  // Anden combo-box
-  combo2 = createSelect();
-  combo2.position(width / 2 + 50, 60);
-  combo2.option("A");
-  combo2.option("B");
-  combo2.option("C");
-  combo2.option("D");
-  combo2.option("E");
-  combo2.option("F");
-  combo2.option("G");
-
-  // Knap
-  button = createButton("Find korteste vej");
-  button.position(width / 2 + 50, 100);
-  button.mousePressed(buttonHandler);
-
-  // Returnér elementerne
-  return { combo1, combo2, button };
-}
-
-function tegnTabelOverVægte() {
-  if (!graf || !graf.noder) return;
-
-  const nodes = graf.noder;
-  const n = nodes.length;
-  let cellWidth = 52.25;
-  let cellHeight = 20;
-
-  // helper: find vægt mellem to noder
-  function getWeight(a, b) {
-    for (let e of graf.kanter) {
-      if ((e.a === a && e.b === b) || (e.a === b && e.b === a)) {
-        return e.vægt < maxKantVægt ? e.vægt : "-";
-      }
-    }
-    return "-";
-  }
-
-  // tegn header række
-  for (let j = 0; j < n + 1; j++) {
-    let x = j * cellWidth;
-    let y = 10;
-    stroke(0);
-    noFill();
-    rect(x, y, cellWidth, cellHeight);
-
-    fill(0);
-    noStroke();
-    textSize(12);
-    textAlign(CENTER, CENTER);
-    if (j === 0) {
-      text("Vægt", x + cellWidth / 2, y + cellHeight / 2 + 6);
-    } else {
-      text(nodes[j - 1].id, x + cellWidth / 2, y + cellHeight / 2 + 6);
-    }
-  }
-
-  // tegn data rækker
-  for (let i = 0; i < n; i++) {
-    let rowY = (i + 1) * cellHeight + 10;
-
-    // første celle: node-id
-    stroke(0);
-    noFill();
-    rect(0, rowY, cellWidth, cellHeight);
-    fill(0);
-    noStroke();
-    textSize(12);
-    textAlign(CENTER, CENTER);
-    text(nodes[i].id, cellWidth / 2, rowY + cellHeight / 2 + 6);
-
-    // vægt-celler
-    for (let j = 0; j < n; j++) {
-      let x = (j + 1) * cellWidth;
-      stroke(0);
-      noFill();
-      rect(x, rowY, cellWidth, cellHeight);
-
-      fill(0);
-      noStroke();
-      textAlign(CENTER, CENTER);
-      const weight = i === j ? "0" : getWeight(nodes[i], nodes[j]);
-      text(weight, x + cellWidth / 2, rowY + cellHeight / 2 + 6);
-    }
-  }
-}
 
 class Stadion {
   constructor(id, x, y, meta = {}) {
@@ -303,7 +129,180 @@ class Graf {
   }
 }
 
-let graf;
+
+function initializeDijkstra(graf, startNode) {
+  distances = {};
+  predecessors = {};
+  for (let node of graf.noder) {
+    distances[node.id] = Infinity;
+    predecessors[node.id] = null;
+  }
+  distances[startNode.id] = 0;
+}
+
+
+function Dijkstra(startNode) {
+  initializeDijkstra(graf, startNode);
+
+  let unvisited = new Set(graf.noder);
+  console.log("Unvisited nodes:", unvisited);
+  while (unvisited.size > 0) {
+    // finde den node med den mindste afstand
+    let currentNode = null;
+    let currentDist = Infinity;
+    for (let node of unvisited) {
+      if (distances[node.id] < currentDist) {
+        currentDist = distances[node.id];
+        currentNode = node;
+      }
+    }
+
+    // fjern currentNode fra unvisited
+    unvisited.delete(currentNode);
+
+    // Find alle naboer til currentNode
+    let naboer = []
+    for (let kant of graf.kanter) {
+      if (kant.a === currentNode) {
+        naboer.push(kant.b)
+      } else if (kant.b === currentNode) {
+        naboer.push(kant.a)
+      }
+    }
+
+    // opdatere afstande til naboer
+    for (let n of naboer) {
+      let alt = distances[currentNode.id] + getWeight(currentNode, n);
+      if (alt < distances[n.id]) {
+        distances[n.id] = alt;
+        predecessors[n.id] = currentNode;
+      }
+    }
+  }
+
+  return { predecessors, distances };
+
+}
+
+function buttonHandler() {
+  const startId = combo1.value();
+  const slutId = combo2.value();
+  if (startId === slutId) {
+    alert("Start- og slutstadion må ikke være det samme!");
+    return;
+  } else if (!startId || !slutId) {
+    alert("Vælg både start- og slutstadion!");
+    return;
+  } else {
+    const shortestPath = Dijkstra(
+      graf.noder.find((n) => n.id === startId),
+      graf.noder.find((n) => n.id === slutId)
+    );
+    console.log("Korteste vej:", shortestPath);
+  }
+}
+
+function createUI() {
+  // Første combo-box
+  combo1 = createSelect();
+  combo1.position(width / 2 + 50, 20);
+
+  combo1.option("A");
+  combo1.option("B");
+  combo1.option("C");
+  combo1.option("D");
+  combo1.option("E");
+  combo1.option("F");
+  combo1.option("G");
+
+  // Anden combo-box
+  combo2 = createSelect();
+  combo2.position(width / 2 + 50, 60);
+  combo2.option("A");
+  combo2.option("B");
+  combo2.option("C");
+  combo2.option("D");
+  combo2.option("E");
+  combo2.option("F");
+  combo2.option("G");
+
+  // Knap
+  button = createButton("Find korteste vej");
+  button.position(width / 2 + 50, 100);
+  button.mousePressed(buttonHandler);
+
+  // Returnér elementerne
+  return { combo1, combo2, button };
+}
+
+// helper: find vægt mellem to noder
+function getWeight(a, b) {
+  for (let e of graf.kanter) {
+    if ((e.a === a && e.b === b) || (e.a === b && e.b === a)) {
+      return e.vægt < maxKantVægt ? e.vægt : "-";
+    }
+  }
+  return "-";
+}
+
+function tegnTabelOverVægte() {
+  if (!graf || !graf.noder) return;
+
+  const nodes = graf.noder;
+  const n = nodes.length;
+  let cellWidth = 52.25;
+  let cellHeight = 20;
+
+
+
+  // tegn header række
+  for (let j = 0; j < n + 1; j++) {
+    let x = j * cellWidth;
+    let y = 10;
+    stroke(0);
+    noFill();
+    rect(x, y, cellWidth, cellHeight);
+
+    fill(0);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    if (j === 0) {
+      text("Vægt", x + cellWidth / 2, y + cellHeight / 2 + 6);
+    } else {
+      text(nodes[j - 1].id, x + cellWidth / 2, y + cellHeight / 2 + 6);
+    }
+  }
+
+  // tegn data rækker
+  for (let i = 0; i < n; i++) {
+    let rowY = (i + 1) * cellHeight + 10;
+
+    // første celle: node-id
+    stroke(0);
+    noFill();
+    rect(0, rowY, cellWidth, cellHeight);
+    fill(0);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    text(nodes[i].id, cellWidth / 2, rowY + cellHeight / 2 + 6);
+
+    // vægt-celler
+    for (let j = 0; j < n; j++) {
+      let x = (j + 1) * cellWidth;
+      stroke(0);
+      noFill();
+      rect(x, rowY, cellWidth, cellHeight);
+
+      fill(0);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      const weight = i === j ? "0" : getWeight(nodes[i], nodes[j]);
+      text(weight, x + cellWidth / 2, rowY + cellHeight / 2 + 6);
+    }
+  }
+}
 
 function preload() {
   img = loadImage("danmarkskort.png");
@@ -392,10 +391,24 @@ function setup() {
   );
 
   // lav alle kanter (fuld graf)
-  graf.forbindAlle();
+  //graf.forbindAlle();
+  graf.tilføjeKant(graf.noder[0], graf.noder[1]); // A-B
+  graf.tilføjeKant(graf.noder[0], graf.noder[6]); // A-G
+  graf.tilføjeKant(graf.noder[1], graf.noder[5]); // B-F
+  graf.tilføjeKant(graf.noder[1], graf.noder[3]); // B-D
+  graf.tilføjeKant(graf.noder[1], graf.noder[2]); // B-C
+  graf.tilføjeKant(graf.noder[1], graf.noder[6]); // B-G
+  graf.tilføjeKant(graf.noder[2], graf.noder[3]); // C-D
+  graf.tilføjeKant(graf.noder[2], graf.noder[5]); // C-F
+  graf.tilføjeKant(graf.noder[3], graf.noder[6]); // D-G
+  graf.tilføjeKant(graf.noder[4], graf.noder[1]); // E-B
+  graf.tilføjeKant(graf.noder[4], graf.noder[5]); // E-F
+
 
   // Behold stadions hvis du vil bruge den gamle funktion også
   stadions = graf.noder;
+  console.log(graf.noder);
+  console.log(graf.kanter);
 }
 
 function tegnLabelsTilComboBoxes() {
