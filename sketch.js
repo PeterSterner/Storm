@@ -9,6 +9,7 @@ let combo1, combo2;
 let graf;
 let distances;
 let predecessors;
+let drawShortestPathFlag = false;
 
 class Stadion {
   constructor(id, x, y, meta = {}) {
@@ -133,6 +134,7 @@ class Graf {
 function initializeDijkstra(graf, startNode) {
   distances = {};
   predecessors = {};
+  drawShortestPathFlag = false;
   for (let node of graf.noder) {
     distances[node.id] = Infinity;
     predecessors[node.id] = null;
@@ -179,6 +181,7 @@ function Dijkstra(startNode) {
       }
     }
   }
+  drawShortestPathFlag = true;
 
   return { predecessors, distances };
 
@@ -194,11 +197,10 @@ function buttonHandler() {
     alert("Vælg både start- og slutstadion!");
     return;
   } else {
-    const shortestPath = Dijkstra(
+    Dijkstra(
       graf.noder.find((n) => n.id === startId),
       graf.noder.find((n) => n.id === slutId)
     );
-    console.log("Korteste vej:", shortestPath);
   }
 }
 
@@ -233,6 +235,19 @@ function createUI() {
 
   // Returnér elementerne
   return { combo1, combo2, button };
+}
+
+function drawShortestPath(predecessors, startNode, endNode) {
+  let currentNode = endNode;
+  stroke(255, 0, 0);
+  strokeWeight(4);
+  while (currentNode && currentNode !== startNode) {
+    let prevNode = predecessors[currentNode.id];
+    if (prevNode) {
+      line(currentNode.x, currentNode.y, prevNode.x, prevNode.y);
+    }
+    currentNode = prevNode;
+  }
 }
 
 // helper: find vægt mellem to noder
@@ -433,4 +448,11 @@ function draw() {
     hovered.displayTooltip();
   }
   tegnTabelOverVægte();
+  if (drawShortestPathFlag) {
+    const startId = combo1.value();
+    const slutId = combo2.value();
+    const startNode = graf.noder.find((n) => n.id === startId);
+    const endNode = graf.noder.find((n) => n.id === slutId);
+    drawShortestPath(predecessors, startNode, endNode);
+  }
 }
